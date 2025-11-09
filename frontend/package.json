@@ -1,0 +1,13 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "description": "Frontend application",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "dev": "echo 'Development server will be configured'",
+    "build": "echo 'Build script will be configured'",
+    "start": "echo 'Start script will be configured'"
+  }
+}

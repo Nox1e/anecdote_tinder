@@ -1,0 +1,2 @@
+# Backend dependencies will be defined here
+# Format: package-name==version or package-name>=version
