@@ -15,6 +15,7 @@ from app.auth import (
 )
 from app.db.session import get_db
 from app.models.user import User
+from app.models.profile import Profile
 from app.schemas.auth import (
     AuthResponse,
     AuthUser,
@@ -126,6 +127,16 @@ async def register(
     db.add(user)
     db.commit()
     db.refresh(user)
+    
+    # Create profile with sensible defaults
+    profile = Profile(
+        user_id=user.id,
+        display_name=user_data.username,
+        is_active=True,
+    )
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
     
     # Create access token
     token = create_access_token(user.id, db)

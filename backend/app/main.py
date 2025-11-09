@@ -6,7 +6,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth_router
+from app.api import auth_router, profile_router
 from app.config import settings
 from app.db.session import create_tables
 
@@ -39,6 +39,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(auth_router)
+app.include_router(profile_router)
 
 
 @app.get("/health")

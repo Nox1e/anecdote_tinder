@@ -297,18 +297,3 @@ def test_session_persistence(db_session: Session):
         SessionModel.token == token
     ).all()
     assert len(sessions) == 1
-
-
-@pytest.fixture
-def db_session():
-    """Create a test database session."""
-    from app.db.session import SessionLocal
-    session = SessionLocal()
-    try:
-        yield session
-    finally:
-        # Clean up test data
-        session.query(SessionModel).delete()
-        session.query(User).delete()
-        session.commit()
-        session.close()
