@@ -40,7 +40,7 @@ export interface Profile {
   id: number;
   user_id: number;
   display_name: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
   avatar_url?: string;
   bio?: string;
   hobbies?: string;
@@ -52,7 +52,7 @@ export interface Profile {
 
 export interface ProfileUpdateRequest {
   display_name?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
   avatar_url?: string;
   bio?: string;
   hobbies?: string;
@@ -74,7 +74,7 @@ export interface FeedProfile {
   id: number;
   user_id: number;
   display_name: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
   avatar_url?: string;
   favorite_joke?: string;
 }

@@ -1,4 +1,65 @@
+import { useState } from 'react';
+import { useProfile } from '@/hooks/useProfile';
+import { settingsService } from '@/services';
+import { AuthError } from '@/services/auth';
+
 const SettingsPage = () => {
+  const { profile, refetch, loading: profileLoading } = useProfile();
+  const [isClosing, setIsClosing] = useState(false);
+  const [isReopening, setIsReopening] = useState(false);
+  const [closeError, setCloseError] = useState<string | null>(null);
+  const [closeSuccess, setCloseSuccess] = useState(false);
+  const [showConfirmClose, setShowConfirmClose] = useState(false);
+  const [showConfirmReopen, setShowConfirmReopen] = useState(false);
+
+  const handleCloseProfile = async () => {
+    setIsClosing(true);
+    setCloseError(null);
+    setCloseSuccess(false);
+
+    try {
+      await settingsService.closeProfile();
+      setCloseSuccess(true);
+      await refetch();
+      setShowConfirmClose(false);
+      setTimeout(() => setCloseSuccess(false), 3000);
+    } catch (err) {
+      const message = err instanceof AuthError ? err.message : 'Failed to close profile';
+      setCloseError(message);
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
+  const handleReopenProfile = async () => {
+    setIsReopening(true);
+    setCloseError(null);
+    setCloseSuccess(false);
+
+    try {
+      await settingsService.reopenProfile();
+      setCloseSuccess(true);
+      await refetch();
+      setShowConfirmReopen(false);
+      setTimeout(() => setCloseSuccess(false), 3000);
+    } catch (err) {
+      const message = err instanceof AuthError ? err.message : 'Failed to reopen profile';
+      setCloseError(message);
+    } finally {
+      setIsReopening(false);
+    }
+  };
+
+  if (profileLoading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-center py-20">
+          <span className="text-sm text-gray-500">Loading your settings…</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -8,131 +69,102 @@ const SettingsPage = () => {
         </p>
       </div>
 
+      {closeSuccess && (
+        <div className="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+          {profile?.is_active ? 'Profile reopened successfully' : 'Profile closed successfully'}
+        </div>
+      )}
+
+      {closeError && (
+        <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          {closeError}
+        </div>
+      )}
+
       <div className="space-y-6">
-        <div className="card">
-          <h2 className="text-xl font-medium text-gray-900 mb-4">
-            Account Settings
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="input"
-                defaultValue="john.doe@example.com"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                className="input"
-                defaultValue="johndoe"
-              />
-            </div>
-            <button className="btn btn-primary">Update Account</button>
-          </div>
-        </div>
-
-        <div className="card">
-          <h2 className="text-xl font-medium text-gray-900 mb-4">
-            Privacy Settings
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  Profile Visibility
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Control who can see your profile
-                </p>
-              </div>
-              <select className="input max-w-xs">
-                <option>Everyone</option>
-                <option>Matches Only</option>
-                <option>Nobody</option>
-              </select>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  Show Online Status
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Let others see when you're online
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                defaultChecked
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <h2 className="text-xl font-medium text-gray-900 mb-4">
-            Notification Settings
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  Email Notifications
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Receive email updates about your activity
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                defaultChecked
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  Push Notifications
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Receive push notifications on your device
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="card border-red-200">
           <h2 className="text-xl font-medium text-red-900 mb-4">Danger Zone</h2>
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium text-gray-900 mb-2">Close Profile</h3>
+              <h3 className="font-medium text-gray-900 mb-2">
+                Profile Status: {profile?.is_active ? (
+                  <span className="text-green-600 text-sm">Active</span>
+                ) : (
+                  <span className="text-red-600 text-sm">Closed</span>
+                )}
+              </h3>
               <p className="text-sm text-gray-500 mb-3">
-                Temporarily hide your profile from other users. You can reopen
-                it at any time.
+                {profile?.is_active
+                  ? 'Your profile is currently visible to other users. You can close it to hide your profile.'
+                  : 'Your profile is currently hidden from other users. You can reopen it to become visible again.'}
               </p>
-              <button className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50">
-                Close Profile
-              </button>
+              {profile?.is_active ? (
+                <>
+                  <button
+                    onClick={() => setShowConfirmClose(true)}
+                    disabled={isClosing}
+                    className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isClosing ? 'Closing...' : 'Close Profile'}
+                  </button>
+                  {showConfirmClose && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
+                      <p className="text-sm font-medium text-red-900 mb-3">
+                        Are you sure you want to close your profile? It will be hidden from other users, but you can reopen it at any time.
+                      </p>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={handleCloseProfile}
+                          disabled={isClosing}
+                          className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isClosing ? 'Closing...' : 'Yes, Close Profile'}
+                        </button>
+                        <button
+                          onClick={() => setShowConfirmClose(false)}
+                          disabled={isClosing}
+                          className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowConfirmReopen(true)}
+                    disabled={isReopening}
+                    className="btn btn-outline border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isReopening ? 'Reopening...' : 'Reopen Profile'}
+                  </button>
+                  {showConfirmReopen && (
+                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded">
+                      <p className="text-sm font-medium text-green-900 mb-3">
+                        Are you sure you want to reopen your profile? It will be visible to other users again.
+                      </p>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={handleReopenProfile}
+                          disabled={isReopening}
+                          className="btn btn-outline border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isReopening ? 'Reopening...' : 'Yes, Reopen Profile'}
+                        </button>
+                        <button
+                          onClick={() => setShowConfirmReopen(false)}
+                          disabled={isReopening}
+                          className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             <div className="pt-4 border-t border-red-200">
               <h3 className="font-medium text-gray-900 mb-2">Delete Account</h3>
@@ -140,8 +172,11 @@ const SettingsPage = () => {
                 Permanently delete your account and all data. This action cannot
                 be undone.
               </p>
-              <button className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50">
-                Delete Account
+              <button
+                className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Delete Account (Coming Soon)
               </button>
             </div>
           </div>
