@@ -8,6 +8,13 @@ from app.schemas.auth import (
     MessageResponse,
     RegisterRequest,
 )
+from app.schemas.profile import (
+    ProfileBase,
+    ProfileUpdate,
+    ProfileResponse,
+    ProfilePublicResponse,
+    GenderEnum as ProfileGenderEnum,
+)
 
 __all__ = [
     "AuthResponse",
@@ -16,4 +23,9 @@ __all__ = [
     "LoginRequest",
     "MessageResponse",
     "RegisterRequest",
+    "ProfileBase",
+    "ProfileUpdate",
+    "ProfileResponse",
+    "ProfilePublicResponse",
+    "ProfileGenderEnum",
 ]
