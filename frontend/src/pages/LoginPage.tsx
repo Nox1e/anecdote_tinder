@@ -1,6 +1,73 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/hooks/useAuth';
+
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const {
+    login,
+    loading,
+    error,
+    isAuthenticated,
+    clearError,
+  } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    clearErrors,
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  useEffect(() => {
+    if (error) {
+      setError('root', {
+        type: 'server',
+        message: error,
+      });
+    } else {
+      clearErrors('root');
+    }
+  }, [error, setError, clearErrors]);
+
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
+
+  const onSubmit = async (values: LoginFormValues) => {
+    try {
+      await login(values);
+      navigate('/search', { replace: true });
+    } catch {
+      // Errors are handled via auth store state
+    }
+  };
+
+  const submitting = isSubmitting || loading;
+
+  if (isAuthenticated) {
+    return <Navigate to="/search" replace />;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -18,68 +85,71 @@ const LoginPage = () => {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6">
-          <div className="rounded-md shadow-sm -space-y-px">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <div className="space-y-5">
             <div>
-              <label htmlFor="username" className="sr-only">
-                Username
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email address
               </label>
               <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
+                id="email"
+                type="email"
+                autoComplete="email"
+                className="mt-1 input"
+                {...register('email', {
+                  onChange: () => {
+                    if (error) {
+                      clearError();
+                    }
+                  },
+                })}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                autoComplete="current-password"
+                className="mt-1 input"
+                {...register('password', {
+                  onChange: () => {
+                    if (error) {
+                      clearError();
+                    }
+                  },
+                })}
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Remember me
-              </label>
+          {errors.root && (
+            <div className="rounded-md bg-red-50 p-4">
+              <p className="text-sm text-red-700">{errors.root.message}</p>
             </div>
-
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-primary-600 hover:text-primary-500"
-              >
-                Forgot your password?
-              </a>
-            </div>
-          </div>
+          )}
 
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              className="btn btn-primary w-full"
+              disabled={submitting}
             >
-              Sign in
+              {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </div>
         </form>
