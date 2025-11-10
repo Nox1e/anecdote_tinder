@@ -1,17 +1,38 @@
 // Error response from API
 export interface ApiError {
   detail: string;
-  status: number;
+  status?: number;
 }
 
-// User types
-export interface User {
+// Authentication types
+export interface AuthUser {
   id: number;
-  username: string;
   email: string;
-  is_active: boolean;
+  username: string;
   created_at: string;
   updated_at: string;
+}
+
+export type User = AuthUser;
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  user: AuthUser;
+  token: string;
+}
+
+export interface MessageResponse {
+  message: string;
 }
 
 // Profile types
@@ -29,24 +50,6 @@ export interface Profile {
   updated_at: string;
 }
 
-// Auth types
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  access_token: string;
-  token_type: string;
-}
-
-// Profile update types
 export interface ProfileUpdateRequest {
   display_name?: string;
   gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';

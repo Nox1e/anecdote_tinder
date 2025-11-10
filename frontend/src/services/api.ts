@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { ApiError } from '@/types/api';
+import { clearSessionToken, getSessionToken, setSessionToken } from './auth';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -16,9 +17,20 @@ class ApiClient {
     // Request interceptor to add auth token
     this.client.interceptors.request.use(
       config => {
-        const token = localStorage.getItem('access_token');
+        const token = getSessionToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          if (!config.headers) {
+            config.headers = {};
+          }
+
+          if (typeof (config.headers as unknown as { set?: unknown }).set === 'function') {
+            (config.headers as unknown as { set: (name: string, value: string) => void }).set(
+              'Authorization',
+              `Bearer ${token}`
+            );
+          } else {
+            (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
+          }
         }
         return config;
       },
@@ -33,7 +45,7 @@ class ApiClient {
       (error: AxiosError<ApiError>) => {
         if (error.response?.status === 401) {
           // Token expired or invalid
-          localStorage.removeItem('access_token');
+          clearSessionToken();
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -67,17 +79,17 @@ class ApiClient {
 
   // Set auth token
   setAuthToken(token: string) {
-    localStorage.setItem('access_token', token);
+    setSessionToken(token);
   }
 
   // Clear auth token
   clearAuthToken() {
-    localStorage.removeItem('access_token');
+    clearSessionToken();
   }
 
   // Get current auth token
   getAuthToken(): string | null {
-    return localStorage.getItem('access_token');
+    return getSessionToken();
   }
 }
 
