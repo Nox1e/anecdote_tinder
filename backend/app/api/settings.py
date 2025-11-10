@@ -49,3 +49,40 @@ async def close_profile(
         is_active=profile.is_active,
         message="Profile closed successfully"
     )
+
+
+@router.post("/reopen-profile", response_model=CloseProfileResponse)
+async def reopen_profile(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CloseProfileResponse:
+    """Reopen the current user's profile (sets is_active to True)."""
+    # Get user's profile
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found"
+        )
+    
+    # Reopen the profile
+    profile.is_active = True
+    
+    try:
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reopen profile"
+        )
+    
+    return CloseProfileResponse(
+        success=True,
+        is_active=profile.is_active,
+        message="Profile reopened successfully"
+    )

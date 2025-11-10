@@ -43,4 +43,8 @@ export const settingsService = {
   async closeProfile(): Promise<MessageResponse> {
     return apiClient.post<MessageResponse>('/settings/close-profile');
   },
+
+  async reopenProfile(): Promise<MessageResponse> {
+    return apiClient.post<MessageResponse>('/settings/reopen-profile');
+  },
 };

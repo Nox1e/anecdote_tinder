@@ -19,18 +19,8 @@ class ApiClient {
       config => {
         const token = getSessionToken();
         if (token) {
-          if (!config.headers) {
-            config.headers = {};
-          }
-
-          if (typeof (config.headers as unknown as { set?: unknown }).set === 'function') {
-            (config.headers as unknown as { set: (name: string, value: string) => void }).set(
-              'Authorization',
-              `Bearer ${token}`
-            );
-          } else {
-            (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
-          }
+          config.headers = config.headers || {};
+          (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
         }
         return config;
       },
