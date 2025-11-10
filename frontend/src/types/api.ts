@@ -60,13 +60,12 @@ export interface ProfileUpdateRequest {
 }
 
 // Like types
-export interface Like {
+export interface LikeResponse {
   id: number;
   liker_id: number;
   target_id: number;
   mutual: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 // Feed types
@@ -84,12 +83,28 @@ export interface FeedResponse {
   total: number;
   page: number;
   size: number;
+  has_next: boolean;
+  has_prev: boolean;
 }
 
 // Match types
-export interface Match {
+export interface MatchProfile {
+  id: number;
   user_id: number;
   display_name: string;
   avatar_url?: string;
   favorite_joke?: string;
+}
+
+export interface Match {
+  id: number;
+  liker_id: number;
+  target_id: number;
+  created_at: string;
+  matched_with: MatchProfile;
+}
+
+export interface MatchesResponse {
+  matches: Match[];
+  total: number;
 }
