@@ -55,13 +55,13 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
 
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await user.click(screen.getByRole('button', { name: /войти/i }));
 
     expect(
-      await screen.findByText(/please enter a valid email address/i)
+      await screen.findByText(/пожалуйста, введите корректный email/i)
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(/password must be at least 6 characters/i)
+      await screen.findByText(/пароль должен быть не менее 6 символов/i)
     ).toBeInTheDocument();
     expect(authState.login).not.toHaveBeenCalled();
   });
@@ -78,9 +78,9 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/email address/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await user.type(screen.getByLabelText(/электронная почта/i), 'user@example.com');
+    await user.type(screen.getByLabelText(/пароль/i), 'password123');
+    await user.click(screen.getByRole('button', { name: /войти/i }));
 
     await waitFor(() => {
       expect(loginMock).toHaveBeenCalledWith({
@@ -108,9 +108,9 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/email address/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await user.type(screen.getByLabelText(/электронная почта/i), 'user@example.com');
+    await user.type(screen.getByLabelText(/пароль/i), 'password123');
+    await user.click(screen.getByRole('button', { name: /войти/i }));
 
     expect(loginMock).toHaveBeenCalled();
 

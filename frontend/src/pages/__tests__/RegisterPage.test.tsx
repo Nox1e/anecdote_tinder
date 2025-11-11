@@ -55,18 +55,18 @@ describe('RegisterPage', () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/email address/i), 'new@example.com');
-    await user.type(screen.getByLabelText(/^username$/i), 'newuser');
-    await user.type(screen.getByLabelText(/^password$/i), 'password123');
+    await user.type(screen.getByLabelText(/электронная почта/i), 'new@example.com');
+    await user.type(screen.getByLabelText(/имя пользователя/i), 'newuser');
+    await user.type(screen.getByLabelText(/^пароль$/i), 'password123');
     await user.type(
-      screen.getByLabelText(/confirm password/i),
+      screen.getByLabelText(/подтвердите пароль/i),
       'differentPassword'
     );
 
-    await user.click(screen.getByRole('button', { name: /create account/i }));
+    await user.click(screen.getByRole('button', { name: /создать аккаунт/i }));
 
     expect(
-      await screen.findByText(/passwords must match/i)
+      await screen.findByText(/пароли должны совпадать/i)
     ).toBeInTheDocument();
     expect(authState.register).not.toHaveBeenCalled();
   });
@@ -83,12 +83,12 @@ describe('RegisterPage', () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/email address/i), 'new@example.com');
-    await user.type(screen.getByLabelText(/^username$/i), 'newuser');
-    await user.type(screen.getByLabelText(/^password$/i), 'password123');
-    await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+    await user.type(screen.getByLabelText(/электронная почта/i), 'new@example.com');
+    await user.type(screen.getByLabelText(/имя пользователя/i), 'newuser');
+    await user.type(screen.getByLabelText(/^пароль$/i), 'password123');
+    await user.type(screen.getByLabelText(/подтвердите пароль/i), 'password123');
 
-    await user.click(screen.getByRole('button', { name: /create account/i }));
+    await user.click(screen.getByRole('button', { name: /создать аккаунт/i }));
 
     await waitFor(() => {
       expect(registerMock).toHaveBeenCalledWith({
@@ -117,12 +117,12 @@ describe('RegisterPage', () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/email address/i), 'new@example.com');
-    await user.type(screen.getByLabelText(/^username$/i), 'newuser');
-    await user.type(screen.getByLabelText(/^password$/i), 'password123');
-    await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+    await user.type(screen.getByLabelText(/электронная почта/i), 'new@example.com');
+    await user.type(screen.getByLabelText(/имя пользователя/i), 'newuser');
+    await user.type(screen.getByLabelText(/^пароль$/i), 'password123');
+    await user.type(screen.getByLabelText(/подтвердите пароль/i), 'password123');
 
-    await user.click(screen.getByRole('button', { name: /create account/i }));
+    await user.click(screen.getByRole('button', { name: /создать аккаунт/i }));
 
     expect(registerMock).toHaveBeenCalled();
     expect(

@@ -24,7 +24,7 @@ const SettingsPage = () => {
       setShowConfirmClose(false);
       setTimeout(() => setCloseSuccess(false), 3000);
     } catch (err) {
-      const message = err instanceof AuthError ? err.message : 'Failed to close profile';
+      const message = err instanceof AuthError ? err.message : 'Не удалось закрыть профиль';
       setCloseError(message);
     } finally {
       setIsClosing(false);
@@ -43,7 +43,7 @@ const SettingsPage = () => {
       setShowConfirmReopen(false);
       setTimeout(() => setCloseSuccess(false), 3000);
     } catch (err) {
-      const message = err instanceof AuthError ? err.message : 'Failed to reopen profile';
+      const message = err instanceof AuthError ? err.message : 'Не удалось открыть профиль';
       setCloseError(message);
     } finally {
       setIsReopening(false);
@@ -54,7 +54,7 @@ const SettingsPage = () => {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-center py-20">
-          <span className="text-sm text-gray-500">Loading your settings…</span>
+          <span className="text-sm text-gray-500">Загружаем настройки…</span>
         </div>
       </div>
     );
@@ -63,15 +63,15 @@ const SettingsPage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Настройки</h1>
         <p className="text-gray-600">
-          Manage your account settings and preferences
+          Управляйте параметрами аккаунта и предпочтениями
         </p>
       </div>
 
       {closeSuccess && (
         <div className="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
-          {profile?.is_active ? 'Profile reopened successfully' : 'Profile closed successfully'}
+          {profile?.is_active ? 'Профиль успешно открыт' : 'Профиль успешно закрыт'}
         </div>
       )}
 
@@ -83,20 +83,20 @@ const SettingsPage = () => {
 
       <div className="space-y-6">
         <div className="card border-red-200">
-          <h2 className="text-xl font-medium text-red-900 mb-4">Danger Zone</h2>
+          <h2 className="text-xl font-medium text-red-900 mb-4">Опасная зона</h2>
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-gray-900 mb-2">
-                Profile Status: {profile?.is_active ? (
-                  <span className="text-green-600 text-sm">Active</span>
+                Статус профиля: {profile?.is_active ? (
+                  <span className="text-green-600 text-sm">Открыт</span>
                 ) : (
-                  <span className="text-red-600 text-sm">Closed</span>
+                  <span className="text-red-600 text-sm">Закрыт</span>
                 )}
               </h3>
               <p className="text-sm text-gray-500 mb-3">
                 {profile?.is_active
-                  ? 'Your profile is currently visible to other users. You can close it to hide your profile.'
-                  : 'Your profile is currently hidden from other users. You can reopen it to become visible again.'}
+                  ? 'Ваш профиль сейчас виден другим пользователям. Вы можете закрыть его, чтобы скрыть профиль.'
+                  : 'Ваш профиль сейчас скрыт от других пользователей. Вы можете открыть его, чтобы снова стать видимым.'}
               </p>
               {profile?.is_active ? (
                 <>
@@ -105,12 +105,12 @@ const SettingsPage = () => {
                     disabled={isClosing}
                     className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isClosing ? 'Closing...' : 'Close Profile'}
+                    {isClosing ? 'Закрываем...' : 'Закрыть профиль'}
                   </button>
                   {showConfirmClose && (
                     <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
                       <p className="text-sm font-medium text-red-900 mb-3">
-                        Are you sure you want to close your profile? It will be hidden from other users, but you can reopen it at any time.
+                        Вы уверены, что хотите закрыть профиль? Он будет скрыт от других пользователей, но вы сможете открыть его снова в любое время.
                       </p>
                       <div className="flex space-x-2">
                         <button
@@ -118,14 +118,14 @@ const SettingsPage = () => {
                           disabled={isClosing}
                           className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {isClosing ? 'Closing...' : 'Yes, Close Profile'}
+                          {isClosing ? 'Закрываем...' : 'Да, закрыть профиль'}
                         </button>
                         <button
                           onClick={() => setShowConfirmClose(false)}
                           disabled={isClosing}
                           className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Cancel
+                          Отмена
                         </button>
                       </div>
                     </div>
@@ -138,12 +138,12 @@ const SettingsPage = () => {
                     disabled={isReopening}
                     className="btn btn-outline border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isReopening ? 'Reopening...' : 'Reopen Profile'}
+                    {isReopening ? 'Открываем...' : 'Открыть профиль'}
                   </button>
                   {showConfirmReopen && (
                     <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded">
                       <p className="text-sm font-medium text-green-900 mb-3">
-                        Are you sure you want to reopen your profile? It will be visible to other users again.
+                        Вы уверены, что хотите открыть профиль? Он снова станет видимым для других пользователей.
                       </p>
                       <div className="flex space-x-2">
                         <button
@@ -151,14 +151,14 @@ const SettingsPage = () => {
                           disabled={isReopening}
                           className="btn btn-outline border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {isReopening ? 'Reopening...' : 'Yes, Reopen Profile'}
+                          {isReopening ? 'Открываем...' : 'Да, открыть профиль'}
                         </button>
                         <button
                           onClick={() => setShowConfirmReopen(false)}
                           disabled={isReopening}
                           className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Cancel
+                          Отмена
                         </button>
                       </div>
                     </div>
@@ -167,16 +167,15 @@ const SettingsPage = () => {
               )}
             </div>
             <div className="pt-4 border-t border-red-200">
-              <h3 className="font-medium text-gray-900 mb-2">Delete Account</h3>
+              <h3 className="font-medium text-gray-900 mb-2">Удалить аккаунт</h3>
               <p className="text-sm text-gray-500 mb-3">
-                Permanently delete your account and all data. This action cannot
-                be undone.
+                Безвозвратно удалите аккаунт и все данные. Это действие нельзя отменить.
               </p>
               <button
                 className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled
               >
-                Delete Account (Coming Soon)
+                Удалить аккаунт (скоро)
               </button>
             </div>
           </div>

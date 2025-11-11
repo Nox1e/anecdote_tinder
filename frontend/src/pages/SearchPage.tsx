@@ -11,10 +11,14 @@ const formatGender = (gender?: FeedProfile['gender']) => {
     return null;
   }
 
-  return gender
-    .split('_')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
+  const genderMap: Record<NonNullable<FeedProfile['gender']>, string> = {
+    male: 'Мужчина',
+    female: 'Женщина',
+    other: 'Другое',
+    prefer_not_to_say: 'Предпочитаю не указывать',
+  };
+
+  return genderMap[gender] ?? null;
 };
 
 const SearchPage = () => {
@@ -51,7 +55,7 @@ const SearchPage = () => {
         setHasNext(response.has_next);
         setFeed(prev => (append ? [...prev, ...response.profiles] : response.profiles));
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to load feed';
+        const message = err instanceof Error ? err.message : 'Не удалось загрузить ленту';
         setError(message);
       } finally {
         if (append) {
@@ -100,12 +104,12 @@ const SearchPage = () => {
       }
 
       if (response.mutual) {
-        setSuccessMessage(`It's a match with ${currentProfile.display_name}!`);
+        setSuccessMessage(`Взаимная симпатия с ${currentProfile.display_name}!`);
       } else {
-        setSuccessMessage(`You liked ${currentProfile.display_name}.`);
+        setSuccessMessage(`Вы поставили лайк ${currentProfile.display_name}.`);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to send like';
+      const message = err instanceof Error ? err.message : 'Не удалось отправить лайк';
       setActionError(message);
     } finally {
       setLikingId(null);
@@ -149,9 +153,9 @@ const SearchPage = () => {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Discover the Feed</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Откройте ленту</h1>
           <p className="text-gray-600">
-            Explore jokes from other users and let them know you&apos;re interested.
+            Читайте анекдоты других пользователей и показывайте им свою симпатию.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -165,7 +169,7 @@ const SearchPage = () => {
             className="btn btn-outline text-sm"
             disabled={loading}
           >
-            Refresh feed
+            Обновить ленту
           </button>
           <button
             type="button"
@@ -175,14 +179,14 @@ const SearchPage = () => {
             className="btn btn-outline text-sm"
             disabled={profileLoading}
           >
-            Reload profile
+            Обновить профиль
           </button>
         </div>
       </div>
 
       {profileLoading && (
         <div className="card">
-          <p className="text-sm text-gray-600">Loading your profile…</p>
+          <p className="text-sm text-gray-600">Загружаем ваш профиль…</p>
         </div>
       )}
 
@@ -190,19 +194,19 @@ const SearchPage = () => {
         <div className="card border border-red-200 bg-red-50 text-red-700">
           <p className="font-medium">{profileError}</p>
           <p className="text-sm mt-1">
-            We couldn&apos;t load your profile information. Try refreshing the page.
+            Не удалось загрузить информацию о вашем профиле. Попробуйте обновить страницу.
           </p>
         </div>
       )}
 
       {profileIsInactive && (
         <div className="card text-center">
-          <h2 className="text-xl font-semibold text-gray-900">Your profile is hidden</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Ваш профиль скрыт</h2>
           <p className="text-gray-600 mt-2">
-            Reopen your profile from settings to appear in the feed and like other users.
+            Откройте профиль в настройках, чтобы появиться в ленте и ставить лайки другим пользователям.
           </p>
           <Link to="/settings" className="btn btn-primary mt-4 inline-flex items-center justify-center">
-            Go to settings
+            Перейти в настройки
           </Link>
         </div>
       )}
@@ -211,7 +215,7 @@ const SearchPage = () => {
         <div className="card border border-green-200 bg-green-50 text-green-700">
           <p className="font-medium">{successMessage}</p>
           <p className="text-sm mt-1">
-            Check the <Link to="/matches" className="font-semibold underline">matches page</Link> to start a conversation.
+            Посмотрите <Link to="/matches" className="font-semibold underline">страницу совпадений</Link>, чтобы начать общение.
           </p>
         </div>
       )}
@@ -226,7 +230,7 @@ const SearchPage = () => {
         <div className="space-y-6">
           {loading && feed.length === 0 && !error && (
             <div className="card">
-              <p className="text-sm text-gray-600">Finding people you&apos;ll love…</p>
+              <p className="text-sm text-gray-600">Подбираем людей, которые вам понравятся…</p>
             </div>
           )}
 
@@ -234,22 +238,22 @@ const SearchPage = () => {
             <div className="card border border-red-200 bg-red-50 text-red-700 space-y-3">
               <div>
                 <p className="font-medium">{error}</p>
-                <p className="text-sm">Please try again in a moment.</p>
+                <p className="text-sm">Пожалуйста, попробуйте позже.</p>
               </div>
               <button type="button" className="btn btn-outline text-sm" onClick={handleRetry}>
-                Try again
+                Попробовать снова
               </button>
             </div>
           )}
 
           {isFeedUnavailable && (
             <div className="card text-center">
-              <h2 className="text-xl font-semibold text-gray-900">You&apos;re all caught up</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Вы просмотрели всех</h2>
               <p className="text-gray-600 mt-2">
-                Check back later for more people or refresh your feed now.
+                Загляните позже за новыми знакомствами или обновите ленту сейчас.
               </p>
               <button type="button" className="btn btn-primary mt-4" onClick={handleRetry}>
-                Reload feed
+                Обновить ленту
               </button>
             </div>
           )}
@@ -282,15 +286,15 @@ const SearchPage = () => {
                         )}
                       </div>
                       <span className="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-700">
-                        Joke #{currentProfile.id}
+                        Профиль #{currentProfile.id}
                       </span>
                     </div>
                     <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        Favorite anecdote
+                        Любимый анекдот
                       </h3>
                       <p className="mt-2 text-gray-700 whitespace-pre-line">
-                        {currentProfile.favorite_joke || 'No anecdote shared yet.'}
+                        {currentProfile.favorite_joke || 'Анекдот пока не указан.'}
                       </p>
                     </div>
                   </div>
@@ -303,7 +307,7 @@ const SearchPage = () => {
                     className="btn btn-outline"
                     disabled={likingId === currentProfile.user_id || loading}
                   >
-                    Skip
+                    Пропустить
                   </button>
                   <button
                     type="button"
@@ -311,7 +315,7 @@ const SearchPage = () => {
                     className="btn btn-primary"
                     disabled={likingId === currentProfile.user_id}
                   >
-                    {likingId === currentProfile.user_id ? 'Liking…' : 'Like'}
+                    {likingId === currentProfile.user_id ? 'Ставим лайк…' : 'Поставить лайк'}
                   </button>
                 </div>
               </div>
@@ -319,7 +323,7 @@ const SearchPage = () => {
               {upcomingProfiles.length > 0 && (
                 <div className="card">
                   <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
-                    Up next
+                    Далее в ленте
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-3">
                     {upcomingProfiles.map(profile => (
@@ -351,7 +355,7 @@ const SearchPage = () => {
                           </div>
                         </div>
                         <p className="mt-3 text-xs text-gray-600">
-                          {profile.favorite_joke || 'No anecdote shared yet.'}
+                          {profile.favorite_joke || 'Анекдот пока не указан.'}
                         </p>
                       </div>
                     ))}
@@ -367,7 +371,7 @@ const SearchPage = () => {
                     className="btn btn-outline"
                     disabled={loadingMore}
                   >
-                    {loadingMore ? 'Loading more…' : 'Load more profiles'}
+                    {loadingMore ? 'Загружаем…' : 'Загрузить ещё профили'}
                   </button>
                 </div>
               )}

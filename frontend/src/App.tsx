@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   if (!hasHydrated || initializing) {
     return (
       <div className="flex items-center justify-center py-20">
-        <span className="text-sm text-gray-500">Loading your account…</span>
+        <span className="text-sm text-gray-500">Загружаем ваш аккаунт…</span>
       </div>
     );
   }
@@ -39,7 +39,7 @@ function App() {
   if (!hasHydrated && initializing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <span className="text-base text-gray-600">Loading your experience…</span>
+        <span className="text-base text-gray-600">Загрузка…</span>
       </div>
     );
   }

@@ -7,10 +7,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const { user, isAuthenticated, logout, error, clearError } = useAuth();
 
   const navItems = [
-    { path: '/search', label: 'Search' },
-    { path: '/matches', label: 'Matches' },
-    { path: '/profile', label: 'Profile' },
-    { path: '/settings', label: 'Settings' },
+    { path: '/search', label: 'Лента' },
+    { path: '/matches', label: 'Совпадения' },
+    { path: '/profile', label: 'Профиль' },
+    { path: '/settings', label: 'Настройки' },
   ];
 
   const handleLogout = async () => {
@@ -24,10 +24,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <div className="container">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-semibold text-gray-900">App</h1>
+              <h1 className="text-xl font-semibold text-gray-900">Anecdotinder</h1>
               {isAuthenticated && user && (
                 <span className="hidden sm:inline-flex text-sm text-gray-500">
-                  Welcome back, <span className="ml-1 font-medium text-gray-700">{user.username}</span>
+                  С возвращением, <span className="ml-1 font-medium text-gray-700">{user.username}</span>
                 </span>
               )}
             </div>
@@ -55,15 +55,15 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   onClick={handleLogout}
                   className="btn btn-outline text-sm"
                 >
-                  Sign out
+                  Выйти
                 </button>
               ) : (
                 <>
                   <NavLink to="/login" className="btn btn-outline text-sm">
-                    Login
+                    Войти
                   </NavLink>
                   <NavLink to="/register" className="btn btn-primary text-sm">
-                    Register
+                    Регистрация
                   </NavLink>
                 </>
               )}
@@ -79,7 +79,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 onClick={clearError}
                 className="text-sm font-medium text-red-600 hover:text-red-700"
               >
-                Dismiss
+                Закрыть
               </button>
             </div>
           </div>
@@ -91,7 +91,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <footer className="bg-white border-t border-gray-200">
         <div className="container py-4">
           <p className="text-center text-sm text-gray-500">
-            © 2024 App. All rights reserved.
+            © 2024 Anecdotinder. Все права защищены.
           </p>
         </div>
       </footer>

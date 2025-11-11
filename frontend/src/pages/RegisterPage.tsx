@@ -7,16 +7,16 @@ import { useAuth } from '@/hooks/useAuth';
 
 const registerSchema = z
   .object({
-    email: z.string().email('Please enter a valid email address'),
-    username: z.string().min(3, 'Username must be at least 3 characters'),
+    email: z.string().email('Пожалуйста, введите корректный email'),
+    username: z.string().min(3, 'Имя пользователя должно быть не менее 3 символов'),
     password: z
       .string()
-      .min(6, 'Password must be at least 6 characters')
-      .max(100, 'Password must be less than 100 characters'),
-    confirmPassword: z.string().min(6, 'Please confirm your password'),
+      .min(6, 'Пароль должен быть не менее 6 символов')
+      .max(100, 'Пароль должен быть менее 100 символов'),
+    confirmPassword: z.string().min(6, 'Пожалуйста, подтвердите пароль'),
   })
   .refine(data => data.password === data.confirmPassword, {
-    message: 'Passwords must match',
+    message: 'Пароли должны совпадать',
     path: ['confirmPassword'],
   });
 
@@ -89,15 +89,15 @@ const RegisterPage = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+            Создайте аккаунт
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Или{' '}
             <Link
               to="/login"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              sign in to your existing account
+              войдите в существующий аккаунт
             </Link>
           </p>
         </div>
@@ -108,7 +108,7 @@ const RegisterPage = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Электронная почта
               </label>
               <input
                 id="email"
@@ -132,7 +132,7 @@ const RegisterPage = () => {
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Username
+                Имя пользователя
               </label>
               <input
                 id="username"
@@ -156,7 +156,7 @@ const RegisterPage = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Пароль
               </label>
               <input
                 id="password"
@@ -180,7 +180,7 @@ const RegisterPage = () => {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
               >
-                Confirm password
+                Подтвердите пароль
               </label>
               <input
                 id="confirmPassword"
@@ -215,7 +215,7 @@ const RegisterPage = () => {
               className="btn btn-primary w-full"
               disabled={submitting}
             >
-              {submitting ? 'Creating account…' : 'Create account'}
+              {submitting ? 'Создаём аккаунт…' : 'Создать аккаунт'}
             </button>
           </div>
         </form>
