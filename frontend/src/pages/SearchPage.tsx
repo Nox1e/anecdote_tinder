@@ -116,7 +116,7 @@ const SearchPage = () => {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     if (!currentProfile) {
       return;
     }
@@ -124,11 +124,17 @@ const SearchPage = () => {
     setSuccessMessage(null);
     setActionError(null);
 
-    const remaining = feed.slice(1);
-    setFeed(remaining);
+    try {
+      await feedService.skipProfile(currentProfile.user_id);
+      const remaining = feed.slice(1);
+      setFeed(remaining);
 
-    if (remaining.length === 0 && hasNext) {
-      void loadFeed(page + 1, { append: true });
+      if (remaining.length === 0 && hasNext) {
+        await loadFeed(page + 1, { append: true });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Не удалось пропустить профиль';
+      setActionError(message);
     }
   };
 

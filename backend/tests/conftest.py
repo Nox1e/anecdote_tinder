@@ -28,12 +28,14 @@ def db_session():
     from app.models.user import User
     from app.models.profile import Profile
     from app.models.like import Like
+    from app.models.profile_view import ProfileView
     
     session = SessionLocal()
     try:
         yield session
     finally:
         # Clean up test data
+        session.query(ProfileView).delete()
         session.query(Like).delete()
         session.query(SessionModel).delete()
         session.query(Profile).delete()

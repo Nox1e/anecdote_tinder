@@ -7,7 +7,7 @@ from app.api.auth import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.like import FeedResponse, LikeResponse, MatchesResponse
-from app.services.feed import get_feed, like_profile, get_matches
+from app.services.feed import get_feed, like_profile, get_matches, skip_profile
 
 router = APIRouter(prefix="/feed", tags=["feed"])
 
@@ -31,6 +31,16 @@ async def like_from_feed(
 ) -> LikeResponse:
     """Create a like for a profile from the feed view."""
     return like_profile(target_id=target_id, current_user=current_user, db=db)
+
+
+@router.post("/{target_id}/skip")
+async def skip_from_feed(
+    target_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Mark a profile as skipped without liking."""
+    return skip_profile(target_id=target_id, current_user=current_user, db=db)
 
 
 @router.get("/matches", response_model=MatchesResponse)

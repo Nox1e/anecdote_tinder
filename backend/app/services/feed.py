@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from fastapi import HTTPException, status
 
 from app.models.profile import Profile
 from app.models.like import Like
 from app.models.user import User
+from app.models.profile_view import ProfileView, InteractionType
 from app.schemas.like import (
     FeedResponse,
     FeedProfileResponse,
@@ -17,6 +18,7 @@ from app.schemas.like import (
     MatchResponse,
     MatchProfileResponse,
 )
+from app.schemas.auth import MessageResponse
 
 
 def get_feed(
@@ -25,13 +27,30 @@ def get_feed(
     """Return a paginated feed of active profiles for the current user."""
     offset = (page - 1) * size
 
+    viewed_alias = aliased(ProfileView)
+    liked_alias = aliased(Like)
+
     query = (
         db.query(Profile)
-        .filter(
+        .outerjoin(
+            viewed_alias,
             and_(
-                Profile.user_id != current_user.id,
-                Profile.is_active == True,  # noqa: E712 - SQLAlchemy comparison
-            )
+                viewed_alias.viewer_id == current_user.id,
+                viewed_alias.viewed_profile_id == Profile.user_id,
+            ),
+        )
+        .outerjoin(
+            liked_alias,
+            and_(
+                liked_alias.liker_id == current_user.id,
+                liked_alias.target_id == Profile.user_id,
+            ),
+        )
+        .filter(
+            Profile.user_id != current_user.id,
+            Profile.is_active == True,  # noqa: E712 - SQLAlchemy comparison
+            viewed_alias.id.is_(None),
+            liked_alias.id.is_(None),
         )
         .order_by(Profile.id.asc())
     )
@@ -75,6 +94,28 @@ def like_profile(*, target_id: int, current_user: User, db: Session) -> LikeResp
             detail="Cannot like yourself",
         )
 
+    # Record profile view as like
+    existing_view = (
+        db.query(ProfileView)
+        .filter(
+            and_(
+                ProfileView.viewer_id == current_user.id,
+                ProfileView.viewed_profile_id == target_id,
+            )
+        )
+        .first()
+    )
+
+    if existing_view:
+        existing_view.interaction_type = InteractionType.LIKE
+    else:
+        profile_view = ProfileView(
+            viewer_id=current_user.id,
+            viewed_profile_id=target_id,
+            interaction_type=InteractionType.LIKE,
+        )
+        db.add(profile_view)
+
     existing_like = (
         db.query(Like)
         .filter(
@@ -87,6 +128,7 @@ def like_profile(*, target_id: int, current_user: User, db: Session) -> LikeResp
     )
 
     if existing_like:
+        db.commit()
         return LikeResponse.model_validate(existing_like)
 
     reverse_like = (
@@ -112,6 +154,19 @@ def like_profile(*, target_id: int, current_user: User, db: Session) -> LikeResp
         if reverse_like and not reverse_like.mutual:
             reverse_like.mutual = True
             db.add(reverse_like)
+
+        # Check if target is a celebrity and auto-like back
+        target_user = db.query(User).filter(User.id == target_id).first()
+        if target_user and target_user.is_celebrity and not reverse_like:
+            # Celebrity auto-likes back
+            celebrity_like = Like(
+                liker_id=target_id,
+                target_id=current_user.id,
+                mutual=True,
+            )
+            db.add(celebrity_like)
+            # Update the current like to be mutual
+            new_like.mutual = True
 
         db.commit()
         db.refresh(new_like)
@@ -168,3 +223,62 @@ def get_matches(*, current_user: User, db: Session) -> MatchesResponse:
             )
 
     return MatchesResponse(matches=matches, total=len(matches))
+
+
+def skip_profile(*, target_id: int, current_user: User, db: Session) -> MessageResponse:
+    """Mark a profile as skipped/viewed without liking."""
+    target_profile = (
+        db.query(Profile)
+        .filter(
+            and_(
+                Profile.user_id == target_id,
+                Profile.is_active == True,  # noqa: E712 - SQLAlchemy comparison
+            )
+        )
+        .first()
+    )
+
+    if not target_profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Target profile not found or inactive",
+        )
+
+    if target_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot skip yourself",
+        )
+
+    # Record profile view as skip
+    existing_view = (
+        db.query(ProfileView)
+        .filter(
+            and_(
+                ProfileView.viewer_id == current_user.id,
+                ProfileView.viewed_profile_id == target_id,
+            )
+        )
+        .first()
+    )
+
+    if existing_view:
+        return MessageResponse(message="Profile already viewed")
+
+    profile_view = ProfileView(
+        viewer_id=current_user.id,
+        viewed_profile_id=target_id,
+        interaction_type=InteractionType.SKIP,
+    )
+
+    try:
+        db.add(profile_view)
+        db.commit()
+    except Exception as exc:  # pragma: no cover - defensive rollback
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to record skip",
+        ) from exc
+
+    return MessageResponse(message="Profile skipped")
