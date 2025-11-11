@@ -8,10 +8,14 @@ const formatGender = (gender?: Profile['gender']) => {
     return null;
   }
 
-  return gender
-    .split('_')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
+  const genderMap: Record<NonNullable<Profile['gender']>, string> = {
+    male: 'Мужчина',
+    female: 'Женщина',
+    other: 'Другое',
+    prefer_not_to_say: 'Предпочитаю не указывать',
+  };
+
+  return genderMap[gender] ?? null;
 };
 
 const formatMatchedAt = (timestamp: string) => {
@@ -27,7 +31,7 @@ const formatMatchedAt = (timestamp: string) => {
 
 const getAnecdoteSnippet = (text?: string | null) => {
   if (!text) {
-    return 'No anecdote shared yet.';
+    return 'Анекдот пока не указан.';
   }
 
   if (text.length <= 160) {
@@ -55,7 +59,7 @@ const MatchesPage = () => {
       const response: MatchesResponse = await feedService.getMatches();
       setMatches(response.matches);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load matches';
+      const message = err instanceof Error ? err.message : 'Не удалось загрузить совпадения';
       setError(message);
     } finally {
       setLoading(false);
@@ -80,7 +84,7 @@ const MatchesPage = () => {
       const profile = await profileService.getPublicProfile(match.matched_with.user_id);
       setProfileDetails(profile);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load profile details';
+      const message = err instanceof Error ? err.message : 'Не удалось загрузить детали профиля';
       setDetailError(message);
     } finally {
       setDetailLoading(false);
@@ -103,9 +107,9 @@ const MatchesPage = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Your Matches</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Ваши совпадения</h1>
           <p className="text-gray-600">
-            Mutual likes appear here. Open a profile to learn more about your match.
+            Взаимные лайки отображаются здесь. Откройте профиль, чтобы узнать больше о собеседнике.
           </p>
         </div>
         <button
@@ -114,13 +118,13 @@ const MatchesPage = () => {
           className="btn btn-outline text-sm"
           disabled={loading}
         >
-          Refresh matches
+          Обновить совпадения
         </button>
       </div>
 
       {loading && (
         <div className="card">
-          <p className="text-sm text-gray-600">Checking for new matches…</p>
+          <p className="text-sm text-gray-600">Ищем новые совпадения…</p>
         </div>
       )}
 
@@ -128,10 +132,10 @@ const MatchesPage = () => {
         <div className="card border border-red-200 bg-red-50 text-red-700 space-y-3">
           <div>
             <p className="font-medium">{error}</p>
-            <p className="text-sm">Please try refreshing to load your matches.</p>
+            <p className="text-sm">Попробуйте обновить страницу, чтобы загрузить совпадения.</p>
           </div>
           <button type="button" className="btn btn-outline text-sm" onClick={handleRefresh}>
-            Try again
+            Попробовать снова
           </button>
         </div>
       )}
@@ -141,12 +145,12 @@ const MatchesPage = () => {
           <div className="w-20 h-20 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-2xl text-gray-500 font-semibold">
             :)
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">No matches yet</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Пока совпадений нет</h2>
           <p className="text-gray-600 mt-2">
-            Like a few profiles in the feed. When someone likes you back, you&apos;ll see them here.
+            Поставьте лайк нескольким профилям в ленте. Как только кто-то ответит взаимностью, вы увидите его здесь.
           </p>
           <Link to="/search" className="btn btn-primary mt-4 inline-flex items-center justify-center">
-            Back to feed
+            Вернуться в ленту
           </Link>
         </div>
       )}
@@ -175,11 +179,11 @@ const MatchesPage = () => {
                         {match.matched_with.display_name}
                       </h2>
                       <p className="text-sm text-gray-500">
-                        Matched on {formatMatchedAt(match.created_at)}
+                        Совпадение от {formatMatchedAt(match.created_at)}
                       </p>
                     </div>
                     <span className="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-700">
-                      Mutual like
+                      Взаимный лайк
                     </span>
                   </div>
                   <p className="mt-4 text-gray-700">{getAnecdoteSnippet(match.matched_with.favorite_joke)}</p>
@@ -191,7 +195,7 @@ const MatchesPage = () => {
                   className="btn btn-primary text-sm"
                   onClick={() => handleViewProfile(match)}
                 >
-                  View profile
+                  Посмотреть профиль
                 </button>
               </div>
             </div>
@@ -206,7 +210,7 @@ const MatchesPage = () => {
               type="button"
               onClick={closeModal}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              aria-label="Close"
+              aria-label="Закрыть"
             >
               ×
             </button>
@@ -229,13 +233,13 @@ const MatchesPage = () => {
                     {selectedMatch.matched_with.display_name}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Matched on {formatMatchedAt(selectedMatch.created_at)}
+                    Совпадение от {formatMatchedAt(selectedMatch.created_at)}
                   </p>
                 </div>
               </div>
 
               {detailLoading && (
-                <p className="text-sm text-gray-600">Loading profile details…</p>
+                <p className="text-sm text-gray-600">Загружаем детали профиля…</p>
               )}
 
               {detailError && (
@@ -248,16 +252,16 @@ const MatchesPage = () => {
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                      Basic info
+                      Основная информация
                     </h3>
                     <p className="text-gray-700 mt-2">
-                      {formatGender(profileDetails.gender) || 'Gender not specified'}
+                      {formatGender(profileDetails.gender) || 'Пол не указан'}
                     </p>
                   </div>
                   {profileDetails.bio && (
                     <div>
                       <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        Bio
+                        О себе
                       </h3>
                       <p className="text-gray-700 mt-2 whitespace-pre-line">{profileDetails.bio}</p>
                     </div>
@@ -265,17 +269,17 @@ const MatchesPage = () => {
                   {profileDetails.hobbies && (
                     <div>
                       <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        Hobbies
+                        Увлечения
                       </h3>
                       <p className="text-gray-700 mt-2 whitespace-pre-line">{profileDetails.hobbies}</p>
                     </div>
                   )}
                   <div>
                     <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                      Favorite anecdote
+                      Любимый анекдот
                     </h3>
                     <p className="text-gray-700 mt-2 whitespace-pre-line">
-                      {profileDetails.favorite_joke || 'No anecdote shared yet.'}
+                      {profileDetails.favorite_joke || 'Анекдот пока не указан.'}
                     </p>
                   </div>
                 </div>
@@ -283,7 +287,7 @@ const MatchesPage = () => {
 
               <div className="flex justify-end">
                 <button type="button" onClick={closeModal} className="btn btn-outline text-sm">
-                  Close
+                  Закрыть
                 </button>
               </div>
             </div>

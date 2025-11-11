@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/hooks/useAuth';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Пожалуйста, введите корректный email'),
+  password: z.string().min(6, 'Пароль должен быть не менее 6 символов'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -73,15 +73,15 @@ const LoginPage = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Войдите в свой аккаунт
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Или{' '}
             <Link
               to="/register"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              create a new account
+              создайте новый аккаунт
             </Link>
           </p>
         </div>
@@ -92,7 +92,7 @@ const LoginPage = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Электронная почта
               </label>
               <input
                 id="email"
@@ -116,7 +116,7 @@ const LoginPage = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Пароль
               </label>
               <input
                 id="password"
@@ -149,7 +149,7 @@ const LoginPage = () => {
               className="btn btn-primary w-full"
               disabled={submitting}
             >
-              {submitting ? 'Signing in…' : 'Sign in'}
+              {submitting ? 'Входим…' : 'Войти'}
             </button>
           </div>
         </form>

@@ -28,25 +28,25 @@ const ProfilePage = () => {
     const errors: Record<string, string> = {};
 
     if (!formData.display_name?.trim()) {
-      errors.display_name = 'Display name is required';
+      errors.display_name = 'Отображаемое имя обязательно';
     } else if (formData.display_name.length > 255) {
-      errors.display_name = 'Display name must be 255 characters or less';
+      errors.display_name = 'Отображаемое имя должно быть не более 255 символов';
     }
 
     if (formData.avatar_url && formData.avatar_url.length > 500) {
-      errors.avatar_url = 'Avatar URL must be 500 characters or less';
+      errors.avatar_url = 'URL аватара должен быть не более 500 символов';
     }
 
     if (formData.bio && formData.bio.length > 1000) {
-      errors.bio = 'Bio must be 1000 characters or less';
+      errors.bio = 'О себе должно быть не более 1000 символов';
     }
 
     if (formData.hobbies && formData.hobbies.length > 1000) {
-      errors.hobbies = 'Hobbies must be 1000 characters or less';
+      errors.hobbies = 'Увлечения должны быть не более 1000 символов';
     }
 
     if (formData.favorite_joke && formData.favorite_joke.length > 500) {
-      errors.favorite_joke = 'Favorite joke must be 500 characters or less';
+      errors.favorite_joke = 'Любимый анекдот должен быть не более 500 символов';
     }
 
     setFormErrors(errors);
@@ -68,7 +68,7 @@ const ProfilePage = () => {
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
     } catch (err) {
-      const message = err instanceof AuthError ? err.message : 'Failed to update profile';
+      const message = err instanceof AuthError ? err.message : 'Не удалось обновить профиль';
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);
@@ -112,7 +112,7 @@ const ProfilePage = () => {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-center py-20">
-          <span className="text-sm text-gray-500">Loading your profile…</span>
+          <span className="text-sm text-gray-500">Загружаем ваш профиль…</span>
         </div>
       </div>
     );
@@ -122,8 +122,8 @@ const ProfilePage = () => {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
-          <p className="text-gray-600">Manage your profile information</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Мой профиль</h1>
+          <p className="text-gray-600">Управляйте информацией о своём профиле</p>
         </div>
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
           {error}
@@ -135,13 +135,13 @@ const ProfilePage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
-        <p className="text-gray-600">Manage your profile information</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Мой профиль</h1>
+        <p className="text-gray-600">Управляйте информацией о своём профиле</p>
       </div>
 
       {submitSuccess && (
         <div className="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
-          Profile updated successfully
+          Профиль успешно обновлён
         </div>
       )}
 
@@ -163,7 +163,7 @@ const ProfilePage = () => {
                 />
               ) : (
                 <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-gray-600 text-sm">No Avatar</span>
+                  <span className="text-gray-600 text-sm">Нет аватара</span>
                 </div>
               )}
               <h2 className="text-xl font-medium text-gray-900 mb-1">
@@ -182,7 +182,7 @@ const ProfilePage = () => {
                   htmlFor="display_name"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Display Name *
+                  Отображаемое имя *
                 </label>
                 <input
                   type="text"
@@ -203,7 +203,7 @@ const ProfilePage = () => {
                   htmlFor="gender"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Gender
+                  Пол
                 </label>
                 <select
                   id="gender"
@@ -213,11 +213,11 @@ const ProfilePage = () => {
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                 >
-                  <option value="">Select a gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer_not_to_say">Prefer Not To Say</option>
+                  <option value="">Выберите пол</option>
+                  <option value="male">Мужчина</option>
+                  <option value="female">Женщина</option>
+                  <option value="other">Другое</option>
+                  <option value="prefer_not_to_say">Предпочитаю не указывать</option>
                 </select>
               </div>
 
@@ -226,7 +226,7 @@ const ProfilePage = () => {
                   htmlFor="avatar_url"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Avatar URL
+                  URL аватара
                 </label>
                 <input
                   type="url"
@@ -248,7 +248,7 @@ const ProfilePage = () => {
                   htmlFor="bio"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Bio
+                  О себе
                 </label>
                 <textarea
                   id="bio"
@@ -262,7 +262,7 @@ const ProfilePage = () => {
                 {formErrors.bio && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.bio}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">{formData.bio?.length || 0} / 1000</p>
+                <p className="mt-1 text-xs text-gray-500">{formData.bio?.length || 0} / 1000 символов</p>
               </div>
 
               <div>
@@ -270,7 +270,7 @@ const ProfilePage = () => {
                   htmlFor="hobbies"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Hobbies & Interests
+                  Увлечения и интересы
                 </label>
                 <input
                   type="text"
@@ -279,13 +279,13 @@ const ProfilePage = () => {
                   className={`input ${formErrors.hobbies ? 'border-red-500' : ''}`}
                   value={formData.hobbies || ''}
                   onChange={handleInputChange}
-                  placeholder="e.g., Hiking, Photography, Coding"
+                  placeholder="например, прогулки, фотография, программирование"
                   disabled={isSubmitting}
                 />
                 {formErrors.hobbies && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.hobbies}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">{formData.hobbies?.length || 0} / 1000</p>
+                <p className="mt-1 text-xs text-gray-500">{formData.hobbies?.length || 0} / 1000 символов</p>
               </div>
 
               <div>
@@ -293,7 +293,7 @@ const ProfilePage = () => {
                   htmlFor="favorite_joke"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Favorite Joke
+                  Любимый анекдот
                 </label>
                 <textarea
                   id="favorite_joke"
@@ -307,7 +307,7 @@ const ProfilePage = () => {
                 {formErrors.favorite_joke && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.favorite_joke}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">{formData.favorite_joke?.length || 0} / 500</p>
+                <p className="mt-1 text-xs text-gray-500">{formData.favorite_joke?.length || 0} / 500 символов</p>
               </div>
 
               <div className="flex space-x-4">
@@ -316,7 +316,7 @@ const ProfilePage = () => {
                   className="btn btn-primary"
                   disabled={isSubmitting || !profile}
                 >
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                  {isSubmitting ? 'Сохраняем...' : 'Сохранить изменения'}
                 </button>
                 <button
                   type="button"
@@ -324,7 +324,7 @@ const ProfilePage = () => {
                   onClick={handleCancel}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  Отмена
                 </button>
               </div>
             </form>
