@@ -9,6 +9,7 @@ A full-stack dating application with a Python FastAPI backend and React frontend
 - [Repository Structure](#repository-structure)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Database Seeding](#database-seeding)
 - [Running the Application](#running-the-application)
   - [Quick Start](#quick-start)
   - [Running Backend](#running-backend)
@@ -87,6 +88,7 @@ project/
 │   │   └── conftest.py        # pytest fixtures and setup
 │   ├── requirements.txt       # Python dependencies
 │   ├── .env.example           # Example environment variables
+│   ├── seed_users.py          # Database seeding script (celebrity profiles)
 │   └── main.py                # Entry point script
 │
 ├── frontend/                  # React + Vite frontend application
@@ -117,6 +119,7 @@ project/
 │
 ├── scripts/                   # Development utility scripts
 │   ├── install.sh             # Setup script (installs all dependencies)
+│   ├── seed_users.sh          # Database seeding (test users)
 │   ├── start_backend.sh       # Starts the backend server
 │   ├── start_frontend.sh      # Starts the frontend dev server
 │   ├── start_all.sh           # Starts both servers in background
@@ -203,6 +206,36 @@ npm install
 # Create .env file from example (if not already done)
 cp .env.example .env
 ```
+
+## Database Seeding
+
+Seed the development database with ready-to-use celebrity profiles for quick testing.
+
+### Using the Script (macOS/Linux)
+
+```bash
+./scripts/seed_users.sh
+```
+
+### Using the Script (Windows)
+
+```powershell
+scripts\seed_users.bat
+```
+
+**What the script does:**
+- Activates the backend virtual environment automatically
+- Ensures dependencies are installed and environment variables are configured
+- Creates all database tables if they do not exist
+- Adds 15 celebrity user accounts with complete profiles
+- Skips seeding if the database already contains users
+
+**Default login credentials:**
+- `elon@tesla.com` / `password123`
+- `mark@facebook.com` / `password123`
+- `taylor@swiftmusic.com` / `password123`
+
+💡 Run the seed script after the installation step anytime you need fresh sample data.
 
 ## Running the Application
 
@@ -552,6 +585,20 @@ Starts both servers simultaneously in background:
 - Displays process IDs
 - Graceful shutdown on `Ctrl+C`
 - Easy cleanup of background processes
+
+### `seed_users.sh`
+
+Seeds the database with celebrity demo users for instant testing:
+
+```bash
+./scripts/seed_users.sh
+```
+
+**Features:**
+- Activates the backend virtual environment automatically
+- Creates tables if they do not exist
+- Inserts 15 celebrity users with full profiles and `password123` password
+- Skips seeding when users are already present
 
 For more details, see `scripts/README.md`
 

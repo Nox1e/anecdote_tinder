@@ -76,6 +76,32 @@ scripts\start_all.bat
 - **Linux/macOS**: Runs both servers in background processes, logs to files (`backend.log` and `frontend.log`), graceful shutdown with Ctrl+C
 - **Windows**: Opens both servers in separate console windows for easy monitoring and stopping
 
+### `seed_users.sh` / `seed_users.bat`
+Populates the database with test user profiles (celebrity users).
+
+**Usage:**
+```bash
+# Linux/macOS
+./scripts/seed_users.sh
+
+# Windows (from scripts folder or project root)
+scripts\seed_users.bat
+# or simply double-click: seed_users.bat
+```
+
+**What it does:**
+- Creates 15 celebrity user profiles with complete information
+- Each user has: display name, bio, hobbies, favorite joke
+- All users have the default password: `password123`
+- Skips seeding if users already exist in the database
+
+**Note:** Run this script after installation to quickly populate the database with test data. This is useful for development and testing without manually creating multiple accounts.
+
+**Example Login Credentials:**
+- Email: `elon@tesla.com` / Password: `password123`
+- Email: `mark@facebook.com` / Password: `password123`
+- Email: `taylor@swiftmusic.com` / Password: `password123`
+
 ## Platform Compatibility
 
 ### Linux/macOS
