@@ -34,6 +34,10 @@ export const feedService = {
     return apiClient.post<LikeResponse>(`/feed/${targetId}/like`);
   },
 
+  async skipProfile(targetId: number): Promise<MessageResponse> {
+    return apiClient.post<MessageResponse>(`/feed/${targetId}/skip`);
+  },
+
   async getMatches(): Promise<MatchesResponse> {
     return apiClient.get<MatchesResponse>(`/feed/matches`);
   },

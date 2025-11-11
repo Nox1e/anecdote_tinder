@@ -50,6 +50,8 @@ const MatchesPage = () => {
   const [profileDetails, setProfileDetails] = useState<Profile | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [showWriteModal, setShowWriteModal] = useState(false);
+  const [writeMatch, setWriteMatch] = useState<Match | null>(null);
 
   const fetchMatches = useCallback(async () => {
     setLoading(true);
@@ -95,6 +97,16 @@ const MatchesPage = () => {
     setSelectedMatch(null);
     setProfileDetails(null);
     setDetailError(null);
+  };
+
+  const handleWriteClick = (match: Match) => {
+    setWriteMatch(match);
+    setShowWriteModal(true);
+  };
+
+  const closeWriteModal = () => {
+    setShowWriteModal(false);
+    setWriteMatch(null);
   };
 
   const hasMatches = matches.length > 0;
@@ -197,9 +209,44 @@ const MatchesPage = () => {
                 >
                   Посмотреть профиль
                 </button>
+                <button
+                  type="button"
+                  className="btn btn-outline text-sm"
+                  onClick={() => handleWriteClick(match)}
+                >
+                  Написать
+                </button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {showWriteModal && writeMatch && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4 py-8 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+            <button
+              type="button"
+              onClick={closeWriteModal}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              aria-label="Закрыть"
+            >
+              ×
+            </button>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Скоро можно будет написать {writeMatch.matched_with.display_name}
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Мы добавим возможность общения в следующем обновлении. Скоро вы сможете отправить первое сообщение прямо из этой карточки.
+              </p>
+              <div className="flex justify-end">
+                <button type="button" onClick={closeWriteModal} className="btn btn-primary text-sm">
+                  Понятно
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
