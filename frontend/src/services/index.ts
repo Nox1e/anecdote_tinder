@@ -4,8 +4,8 @@ import {
   Profile,
   ProfileUpdateRequest,
   FeedResponse,
-  Like,
-  Match,
+  LikeResponse,
+  MatchesResponse,
   MessageResponse,
 } from '@/types/api';
 
@@ -25,17 +25,17 @@ export const profileService = {
   },
 };
 
-export const likesService = {
+export const feedService = {
   async getFeed(page: number = 1, size: number = 10): Promise<FeedResponse> {
-    return apiClient.get<FeedResponse>(`/likes/feed?page=${page}&size=${size}`);
+    return apiClient.get<FeedResponse>(`/feed?page=${page}&size=${size}`);
   },
 
-  async likeUser(targetId: number): Promise<Like> {
-    return apiClient.post<Like>(`/likes/${targetId}`);
+  async likeProfile(targetId: number): Promise<LikeResponse> {
+    return apiClient.post<LikeResponse>(`/feed/${targetId}/like`);
   },
 
-  async getMatches(): Promise<Match[]> {
-    return apiClient.get<Match[]>(`/likes/matches`);
+  async getMatches(): Promise<MatchesResponse> {
+    return apiClient.get<MatchesResponse>(`/feed/matches`);
   },
 };
 
