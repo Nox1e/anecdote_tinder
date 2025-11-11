@@ -76,7 +76,7 @@ const SearchPage = () => {
     }
 
     void loadFeed(1);
-  }, [profile?.is_active, profileLoading, loadFeed]);
+  }, [profile, profileLoading, loadFeed]);
 
   const currentProfile = feed[0];
   const upcomingProfiles = useMemo(() => feed.slice(1, 4), [feed]);
