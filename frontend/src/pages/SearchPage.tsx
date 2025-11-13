@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { feedService } from '@/services';
 import { FeedProfile, FeedResponse } from '@/types/api';
@@ -21,6 +21,31 @@ const formatGender = (gender?: FeedProfile['gender']) => {
   return genderMap[gender] ?? null;
 };
 
+const XIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const HeartIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+
+const LightningIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+    <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+  </svg>
+);
+
 const SearchPage = () => {
   const {
     profile,
@@ -38,6 +63,7 @@ const SearchPage = () => {
   const [actionError, setActionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [likingId, setLikingId] = useState<number | null>(null);
+  const [animating, setAnimating] = useState<'left' | 'right' | null>(null);
 
   const loadFeed = useCallback(
     async (requestedPage: number, { append = false } = {}) => {
@@ -83,59 +109,65 @@ const SearchPage = () => {
   }, [profile, profileLoading, loadFeed]);
 
   const currentProfile = feed[0];
-  const upcomingProfiles = useMemo(() => feed.slice(1, 4), [feed]);
 
   const handleLike = async () => {
-    if (!currentProfile || likingId === currentProfile.user_id) {
+    if (!currentProfile || likingId === currentProfile.user_id || animating) {
       return;
     }
 
     setActionError(null);
     setSuccessMessage(null);
     setLikingId(currentProfile.user_id);
+    setAnimating('right');
 
-    try {
-      const response = await feedService.likeProfile(currentProfile.user_id);
-      const remaining = feed.filter(profile => profile.user_id !== currentProfile.user_id);
-      setFeed(remaining);
+    setTimeout(async () => {
+      try {
+        const response = await feedService.likeProfile(currentProfile.user_id);
+        const remaining = feed.filter(profile => profile.user_id !== currentProfile.user_id);
+        setFeed(remaining);
 
-      if (remaining.length === 0 && hasNext) {
-        await loadFeed(page + 1, { append: true });
+        if (remaining.length === 0 && hasNext) {
+          await loadFeed(page + 1, { append: true });
+        }
+
+        if (response.mutual) {
+          setSuccessMessage(`🎉 Взаимная симпатия с ${currentProfile.display_name}!`);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Не удалось отправить лайк';
+        setActionError(message);
+      } finally {
+        setLikingId(null);
+        setAnimating(null);
       }
-
-      if (response.mutual) {
-        setSuccessMessage(`Взаимная симпатия с ${currentProfile.display_name}!`);
-      } else {
-        setSuccessMessage(`Вы поставили лайк ${currentProfile.display_name}.`);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Не удалось отправить лайк';
-      setActionError(message);
-    } finally {
-      setLikingId(null);
-    }
+    }, 300);
   };
 
   const handleSkip = async () => {
-    if (!currentProfile) {
+    if (!currentProfile || animating) {
       return;
     }
 
     setSuccessMessage(null);
     setActionError(null);
+    setAnimating('left');
 
-    try {
-      await feedService.skipProfile(currentProfile.user_id);
-      const remaining = feed.slice(1);
-      setFeed(remaining);
+    setTimeout(async () => {
+      try {
+        await feedService.skipProfile(currentProfile.user_id);
+        const remaining = feed.slice(1);
+        setFeed(remaining);
 
-      if (remaining.length === 0 && hasNext) {
-        await loadFeed(page + 1, { append: true });
+        if (remaining.length === 0 && hasNext) {
+          await loadFeed(page + 1, { append: true });
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Не удалось пропустить профиль';
+        setActionError(message);
+      } finally {
+        setAnimating(null);
       }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Не удалось пропустить профиль';
-      setActionError(message);
-    }
+    }, 300);
   };
 
   const handleRetry = () => {
@@ -144,45 +176,38 @@ const SearchPage = () => {
     void loadFeed(1);
   };
 
-  const handleLoadMore = () => {
-    if (!hasNext || loadingMore) {
-      return;
-    }
-
-    void loadFeed(page + 1, { append: true });
+  const handleRefreshProfile = () => {
+    setSuccessMessage(null);
+    setActionError(null);
+    void refetchProfile();
   };
 
   const isFeedUnavailable = !loading && !loadingMore && feed.length === 0 && !error;
   const profileIsInactive = profile && !profile.is_active;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div className="container max-w-xl mx-auto space-y-6">
+      <div className="flex flex-col gap-4 bg-white/70 backdrop-blur rounded-3xl shadow-tinder-lg p-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Откройте ленту</h1>
-          <p className="text-gray-600">
-            Читайте анекдоты других пользователей и показывайте им свою симпатию.
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-500">Swipe & Laugh</p>
+          <h1 className="text-3xl font-bold text-gray-900 mt-2">Лента совпадений</h1>
+          <p className="text-sm text-gray-600 mt-2">
+            Свайпайте карточки с анекдотами и ищите тех, кто разделит ваше чувство юмора.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             type="button"
-            onClick={() => {
-              setSuccessMessage(null);
-              setActionError(null);
-              void loadFeed(1);
-            }}
-            className="btn btn-outline text-sm"
+            onClick={handleRetry}
+            className="btn btn-outline flex-1"
             disabled={loading}
           >
             Обновить ленту
           </button>
           <button
             type="button"
-            onClick={() => {
-              void refetchProfile();
-            }}
-            className="btn btn-outline text-sm"
+            onClick={handleRefreshProfile}
+            className="btn btn-outline flex-1"
             disabled={profileLoading}
           >
             Обновить профиль
@@ -191,72 +216,90 @@ const SearchPage = () => {
       </div>
 
       {profileLoading && (
-        <div className="card">
-          <p className="text-sm text-gray-600">Загружаем ваш профиль…</p>
+        <div className="card text-center">
+          <div className="animate-pulse">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-tinder-orange rounded-full mx-auto mb-4" />
+            <p className="text-sm text-gray-600">Загружаем ваш профиль…</p>
+          </div>
         </div>
       )}
 
       {profileError && (
-        <div className="card border border-red-200 bg-red-50 text-red-700">
-          <p className="font-medium">{profileError}</p>
-          <p className="text-sm mt-1">
-            Не удалось загрузить информацию о вашем профиле. Попробуйте обновить страницу.
-          </p>
+        <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-3xl p-6 shadow-tinder-xl animate-bounce-in">
+          <p className="font-bold text-lg">Ошибка загрузки профиля</p>
+          <p className="text-sm mt-1 text-white/90">{profileError}</p>
         </div>
       )}
 
       {profileIsInactive && (
-        <div className="card text-center">
-          <h2 className="text-xl font-semibold text-gray-900">Ваш профиль скрыт</h2>
-          <p className="text-gray-600 mt-2">
-            Откройте профиль в настройках, чтобы появиться в ленте и ставить лайки другим пользователям.
+        <div className="card text-center space-y-4 animate-slide-up">
+          <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full mx-auto flex items-center justify-center text-3xl">
+            😴
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Профиль скрыт</h2>
+          <p className="text-gray-600">
+            Откройте профиль в настройках, чтобы появиться в ленте других пользователей
           </p>
-          <Link to="/settings" className="btn btn-primary mt-4 inline-flex items-center justify-center">
+          <Link to="/settings" className="btn btn-primary inline-flex items-center justify-center mt-4">
             Перейти в настройки
           </Link>
         </div>
       )}
 
       {successMessage && (
-        <div className="card border border-green-200 bg-green-50 text-green-700">
-          <p className="font-medium">{successMessage}</p>
-          <p className="text-sm mt-1">
-            Посмотрите <Link to="/matches" className="font-semibold underline">страницу совпадений</Link>, чтобы начать общение.
+        <div className="bg-gradient-to-r from-green-400 to-tinder-coral text-white rounded-3xl p-5 shadow-tinder-xl mb-4 animate-bounce-in">
+          <p className="font-bold text-center">{successMessage}</p>
+          <p className="text-sm text-center mt-1 text-white/90">
+            Посмотрите <Link to="/matches" className="underline font-bold">страницу совпадений</Link>
           </p>
         </div>
       )}
 
       {actionError && (
-        <div className="card border border-red-200 bg-red-50 text-red-700">
-          <p className="font-medium">{actionError}</p>
+        <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-3xl p-5 shadow-tinder-xl mb-4 animate-bounce-in">
+          <p className="font-bold text-center">{actionError}</p>
         </div>
       )}
 
       {!profileIsInactive && (
         <div className="space-y-6">
           {loading && feed.length === 0 && !error && (
-            <div className="card">
-              <p className="text-sm text-gray-600">Подбираем людей, которые вам понравятся…</p>
+            <div className="card text-center">
+              <div className="animate-pulse space-y-4">
+                <div className="w-full h-96 bg-gradient-to-br from-primary-100 to-tinder-light rounded-2xl" />
+                <div className="flex justify-center space-x-4">
+                  <div className="w-14 h-14 bg-gray-200 rounded-full" />
+                  <div className="w-16 h-16 bg-gray-300 rounded-full" />
+                  <div className="w-14 h-14 bg-gray-200 rounded-full" />
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-4">Подбираем людей для вас…</p>
             </div>
           )}
 
           {error && (
-            <div className="card border border-red-200 bg-red-50 text-red-700 space-y-3">
-              <div>
-                <p className="font-medium">{error}</p>
-                <p className="text-sm">Пожалуйста, попробуйте позже.</p>
+            <div className="card text-center space-y-4 border-red-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full mx-auto flex items-center justify-center text-3xl">
+                😕
               </div>
-              <button type="button" className="btn btn-outline text-sm" onClick={handleRetry}>
+              <div>
+                <p className="font-bold text-lg text-gray-900">{error}</p>
+                <p className="text-sm text-gray-600 mt-1">Пожалуйста, попробуйте позже</p>
+              </div>
+              <button type="button" className="btn btn-primary" onClick={handleRetry}>
                 Попробовать снова
               </button>
             </div>
           )}
 
           {isFeedUnavailable && (
-            <div className="card text-center">
-              <h2 className="text-xl font-semibold text-gray-900">Вы просмотрели всех</h2>
-              <p className="text-gray-600 mt-2">
-                Загляните позже за новыми знакомствами или обновите ленту сейчас.
+            <div className="card text-center space-y-4 animate-slide-up">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-tinder-light rounded-full mx-auto flex items-center justify-center text-3xl">
+                🎉
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Вы просмотрели всех!</h2>
+              <p className="text-gray-600">
+                Загляните позже за новыми знакомствами
               </p>
               <button type="button" className="btn btn-primary mt-4" onClick={handleRetry}>
                 Обновить ленту
@@ -266,119 +309,120 @@ const SearchPage = () => {
 
           {currentProfile && (
             <div className="space-y-6">
-              <div className="card space-y-6">
-                <div className="flex items-start gap-4">
-                  {currentProfile.avatar_url ? (
-                    <img
-                      src={currentProfile.avatar_url}
-                      alt={currentProfile.display_name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-xl font-semibold text-primary-700">
-                      {currentProfile.display_name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div>
-                        <h2 className="text-2xl font-semibold text-gray-900">
-                          {currentProfile.display_name}
-                        </h2>
-                        {formatGender(currentProfile.gender) && (
-                          <p className="text-sm text-gray-500">
-                            {formatGender(currentProfile.gender)}
-                          </p>
-                        )}
+              {/* Main Card */}
+              <div className={`relative ${animating === 'left' ? 'animate-swipe-left' : animating === 'right' ? 'animate-swipe-right' : ''}`}>
+                <div className="relative bg-white rounded-3xl shadow-tinder-xl overflow-hidden border border-gray-100">
+                  {/* Avatar/Photo Section */}
+                  <div className="relative h-[500px] bg-gradient-to-br from-primary-100 via-tinder-light to-tinder-peach/20">
+                    {currentProfile.avatar_url ? (
+                      <img
+                        src={currentProfile.avatar_url}
+                        alt={currentProfile.display_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-9xl font-bold text-white/80">
+                          {currentProfile.display_name.charAt(0).toUpperCase()}
+                        </div>
                       </div>
-                      <span className="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-700">
-                        Профиль #{currentProfile.id}
-                      </span>
+                    )}
+                    
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent" />
+                    
+                    {/* Info Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <h2 className="text-3xl font-bold mb-1">
+                            {currentProfile.display_name}
+                          </h2>
+                          {formatGender(currentProfile.gender) && (
+                            <p className="text-white/90 text-sm">
+                              {formatGender(currentProfile.gender)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                      <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        Любимый анекдот
-                      </h3>
-                      <p className="mt-2 text-gray-700 whitespace-pre-line">
+                  </div>
+
+                  {/* Info Section */}
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-xl">😂</span>
+                        <h3 className="font-bold text-gray-900">Любимый анекдот</h3>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                         {currentProfile.favorite_joke || 'Анекдот пока не указан.'}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={handleSkip}
-                    className="btn btn-outline"
-                    disabled={likingId === currentProfile.user_id || loading}
-                  >
-                    Пропустить
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleLike}
-                    className="btn btn-primary"
-                    disabled={likingId === currentProfile.user_id}
-                  >
-                    {likingId === currentProfile.user_id ? 'Ставим лайк…' : 'Поставить лайк'}
-                  </button>
-                </div>
+                {/* Swipe indicators */}
+                {animating === 'right' && (
+                  <div className="absolute top-12 right-12 bg-green-500 text-white px-8 py-4 rounded-2xl transform rotate-12 text-2xl font-bold shadow-tinder-xl">
+                    LIKE
+                  </div>
+                )}
+                {animating === 'left' && (
+                  <div className="absolute top-12 left-12 bg-red-500 text-white px-8 py-4 rounded-2xl transform -rotate-12 text-2xl font-bold shadow-tinder-xl">
+                    NOPE
+                  </div>
+                )}
               </div>
 
-              {upcomingProfiles.length > 0 && (
-                <div className="card">
-                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
-                    Далее в ленте
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    {upcomingProfiles.map(profile => (
-                      <div
-                        key={profile.user_id}
-                        className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm"
-                      >
-                        <div className="flex items-center gap-3">
-                          {profile.avatar_url ? (
-                            <img
-                              src={profile.avatar_url}
-                              alt={profile.display_name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
-                              {profile.display_name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">
-                              {profile.display_name}
-                            </p>
-                            {formatGender(profile.gender) && (
-                              <p className="text-xs text-gray-500">
-                                {formatGender(profile.gender)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <p className="mt-3 text-xs text-gray-600">
-                          {profile.favorite_joke || 'Анекдот пока не указан.'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Action Buttons */}
+              <div className="flex justify-center items-center space-x-4 py-4">
+                <button
+                  type="button"
+                  onClick={handleSkip}
+                  disabled={animating !== null}
+                  className="w-16 h-16 flex items-center justify-center rounded-full bg-white text-red-500 shadow-tinder-lg hover:shadow-tinder-xl transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-red-100"
+                  aria-label="Пропустить"
+                >
+                  <XIcon />
+                </button>
 
-              {hasNext && (
-                <div className="flex justify-center">
-                  <button
-                    type="button"
-                    onClick={handleLoadMore}
-                    className="btn btn-outline"
-                    disabled={loadingMore}
-                  >
-                    {loadingMore ? 'Загружаем…' : 'Загрузить ещё профили'}
-                  </button>
+                <button
+                  type="button"
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-500 shadow-tinder hover:shadow-tinder-lg transition-all duration-200 hover:scale-105 active:scale-95 opacity-50 cursor-not-allowed"
+                  aria-label="Супер лайк"
+                  disabled
+                >
+                  <StarIcon />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleLike}
+                  disabled={likingId === currentProfile.user_id || animating !== null}
+                  className="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-tinder-orange text-white shadow-tinder-lg hover:shadow-tinder-xl transition-all duration-200 hover:scale-110 active:scale-95"
+                  aria-label="Лайк"
+                >
+                  <HeartIcon />
+                </button>
+
+                <button
+                  type="button"
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-white text-purple-500 shadow-tinder hover:shadow-tinder-lg transition-all duration-200 hover:scale-105 active:scale-95 opacity-50 cursor-not-allowed"
+                  aria-label="Boost"
+                  disabled
+                >
+                  <LightningIcon />
+                </button>
+              </div>
+
+              {/* Additional cards preview (stack effect) */}
+              {feed.length > 1 && (
+                <div className="relative -mt-[520px] pointer-events-none">
+                  <div className="absolute inset-x-4 top-2 h-[500px] bg-white rounded-3xl shadow-tinder opacity-50 transform scale-95" />
+                  {feed.length > 2 && (
+                    <div className="absolute inset-x-8 top-4 h-[500px] bg-white rounded-3xl shadow-sm opacity-30 transform scale-90" />
+                  )}
                 </div>
               )}
             </div>

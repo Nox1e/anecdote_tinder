@@ -52,131 +52,190 @@ const SettingsPage = () => {
 
   if (profileLoading) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-center py-20">
-          <span className="text-sm text-gray-500">Загружаем настройки…</span>
+      <div className="container max-w-4xl mx-auto">
+        <div className="card text-center">
+          <div className="animate-pulse">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-tinder-orange rounded-full mx-auto mb-4" />
+            <p className="text-sm text-gray-600">Загружаем настройки…</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Настройки</h1>
+    <div className="container max-w-4xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-500 to-tinder-orange bg-clip-text text-transparent mb-2">
+          Настройки
+        </h1>
         <p className="text-gray-600">
-          Управляйте параметрами аккаунта и предпочтениями
+          Управляйте видимостью профиля и другими параметрами
         </p>
       </div>
 
       {closeSuccess && (
-        <div className="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
-          {profile?.is_active ? 'Профиль успешно открыт' : 'Профиль успешно закрыт'}
+        <div className="mb-6 bg-gradient-to-r from-green-400 to-tinder-coral text-white rounded-3xl p-5 shadow-tinder-xl animate-bounce-in">
+          <p className="font-bold text-center">
+            {profile?.is_active ? '✅ Профиль успешно открыт!' : '🚫 Профиль успешно закрыт'}
+          </p>
         </div>
       )}
 
       {closeError && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
-          {closeError}
+        <div className="mb-6 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-3xl p-5 shadow-tinder-xl animate-bounce-in">
+          <p className="font-bold text-center">{closeError}</p>
         </div>
       )}
 
       <div className="space-y-6">
-        <div className="card border-red-200">
-          <h2 className="text-xl font-medium text-red-900 mb-4">Опасная зона</h2>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium text-gray-900 mb-2">
-                Статус профиля: {profile?.is_active ? (
-                  <span className="text-green-600 text-sm">Открыт</span>
+        {/* Profile Visibility */}
+        <div className="card">
+          <div className="flex items-start space-x-4 mb-6">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-tinder ${
+              profile?.is_active 
+                ? 'bg-gradient-to-br from-green-400 to-tinder-coral' 
+                : 'bg-gradient-to-br from-gray-300 to-gray-400'
+            }`}>
+              {profile?.is_active ? '👁️' : '🙈'}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                Видимость профиля
+              </h2>
+              <div className="flex items-center space-x-2 mb-3">
+                <span className="text-sm font-semibold text-gray-700">Статус:</span>
+                {profile?.is_active ? (
+                  <span className="pill bg-gradient-to-r from-green-100 to-tinder-light text-green-700">
+                    ✨ Активен
+                  </span>
                 ) : (
-                  <span className="text-red-600 text-sm">Закрыт</span>
+                  <span className="pill bg-gray-200 text-gray-700">
+                    😴 Скрыт
+                  </span>
                 )}
-              </h3>
-              <p className="text-sm text-gray-500 mb-3">
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
                 {profile?.is_active
-                  ? 'Ваш профиль сейчас виден другим пользователям. Вы можете закрыть его, чтобы скрыть профиль.'
-                  : 'Ваш профиль сейчас скрыт от других пользователей. Вы можете открыть его, чтобы снова стать видимым.'}
+                  ? 'Ваш профиль виден другим пользователям, и вы появляетесь в их ленте. Вы можете получать лайки и создавать совпадения.'
+                  : 'Ваш профиль скрыт. Вы не появляетесь в ленте других пользователей и не можете получать новые лайки. Откройте профиль, чтобы снова стать видимым.'}
               </p>
+              
               {profile?.is_active ? (
-                <>
-                  <button
-                    onClick={() => setShowConfirmClose(true)}
-                    disabled={isClosing}
-                    className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isClosing ? 'Закрываем...' : 'Закрыть профиль'}
-                  </button>
+                <div className="space-y-3">
+                  {!showConfirmClose && (
+                    <button
+                      onClick={() => setShowConfirmClose(true)}
+                      disabled={isClosing}
+                      className="btn btn-outline border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                    >
+                      {isClosing ? 'Закрываем...' : 'Скрыть профиль'}
+                    </button>
+                  )}
                   {showConfirmClose && (
-                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm font-medium text-red-900 mb-3">
-                        Вы уверены, что хотите закрыть профиль? Он будет скрыт от других пользователей, но вы сможете открыть его снова в любое время.
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-4 space-y-3">
+                      <p className="text-sm font-medium text-red-900">
+                        Вы уверены? Ваш профиль будет скрыт от других пользователей, но вы сможете открыть его снова в любое время.
                       </p>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-3">
                         <button
                           onClick={handleCloseProfile}
                           disabled={isClosing}
-                          className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="btn btn-primary bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400"
                         >
-                          {isClosing ? 'Закрываем...' : 'Да, закрыть профиль'}
+                          {isClosing ? 'Закрываем...' : 'Да, скрыть'}
                         </button>
                         <button
                           onClick={() => setShowConfirmClose(false)}
                           disabled={isClosing}
-                          className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="btn btn-outline"
                         >
                           Отмена
                         </button>
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               ) : (
-                <>
-                  <button
-                    onClick={() => setShowConfirmReopen(true)}
-                    disabled={isReopening}
-                    className="btn btn-outline border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isReopening ? 'Открываем...' : 'Открыть профиль'}
-                  </button>
+                <div className="space-y-3">
+                  {!showConfirmReopen && (
+                    <button
+                      onClick={() => setShowConfirmReopen(true)}
+                      disabled={isReopening}
+                      className="btn btn-primary bg-gradient-to-r from-green-400 to-tinder-coral hover:from-green-500 hover:to-tinder-coral"
+                    >
+                      {isReopening ? 'Открываем...' : 'Открыть профиль'}
+                    </button>
+                  )}
                   {showConfirmReopen && (
-                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded">
-                      <p className="text-sm font-medium text-green-900 mb-3">
-                        Вы уверены, что хотите открыть профиль? Он снова станет видимым для других пользователей.
+                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 space-y-3">
+                      <p className="text-sm font-medium text-green-900">
+                        Открыть профиль? Вы снова станете видимым для других пользователей и появитесь в их ленте.
                       </p>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-3">
                         <button
                           onClick={handleReopenProfile}
                           disabled={isReopening}
-                          className="btn btn-outline border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="btn btn-primary"
                         >
-                          {isReopening ? 'Открываем...' : 'Да, открыть профиль'}
+                          {isReopening ? 'Открываем...' : 'Да, открыть'}
                         </button>
                         <button
                           onClick={() => setShowConfirmReopen(false)}
                           disabled={isReopening}
-                          className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="btn btn-outline"
                         >
                           Отмена
                         </button>
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
-            <div className="pt-4 border-t border-red-200">
-              <h3 className="font-medium text-gray-900 mb-2">Удалить аккаунт</h3>
-              <p className="text-sm text-gray-500 mb-3">
-                Безвозвратно удалите аккаунт и все данные. Это действие нельзя отменить.
+          </div>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="card border-2 border-red-100">
+          <div className="flex items-start space-x-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-2xl shadow-tinder">
+              ⚠️
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-red-900 mb-2">
+                Опасная зона
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Действия в этом разделе необратимы. Пожалуйста, будьте внимательны.
               </p>
-              <button
-                className="btn btn-outline border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled
-              >
-                Удалить аккаунт (скоро)
-              </button>
+              
+              <div className="pt-4 border-t border-red-100">
+                <h3 className="font-bold text-gray-900 mb-2">Удалить аккаунт</h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Безвозвратно удалите аккаунт и все данные. Это действие нельзя отменить.
+                </p>
+                <button
+                  className="btn btn-outline border-red-200 text-red-700 opacity-50 cursor-not-allowed"
+                  disabled
+                >
+                  Удалить аккаунт (скоро)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Card */}
+        <div className="card bg-gradient-to-br from-primary-50 to-tinder-light border-primary-100">
+          <div className="flex items-start space-x-4">
+            <div className="text-3xl">💡</div>
+            <div>
+              <h3 className="font-bold text-gray-900 mb-2">Совет</h3>
+              <p className="text-sm text-gray-700">
+                Если вы хотите сделать перерыв, но не потерять свои совпадения, просто скройте профиль. 
+                Все ваши матчи и данные сохранятся, и вы сможете вернуться в любое время!
+              </p>
             </div>
           </div>
         </div>

@@ -4,36 +4,53 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 font-sans;
+    @apply bg-gradient-to-b from-tinder-light via-white to-white text-gray-900 font-sans;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background: linear-gradient(180deg, rgba(255, 120, 84, 0.12), rgba(254, 60, 114, 0.05));
   }
 }
 
 @layer components {
+  .container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
   .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply px-4 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm active:scale-[0.98];
   }
 
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply bg-gradient-to-r from-primary-500 via-primary-400 to-primary-500 text-white hover:from-primary-400 hover:via-primary-500 hover:to-primary-400 focus:ring-primary-300 shadow-tinder-lg;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+    @apply bg-gray-100 text-gray-800 hover:bg-gray-200 focus:ring-gray-300 shadow-sm;
   }
 
   .btn-outline {
-    @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500;
+    @apply border border-gray-200 bg-white/80 backdrop-blur text-gray-800 hover:border-primary-200 hover:text-primary-500 focus:ring-primary-200;
+  }
+
+  .control {
+    @apply w-12 h-12 flex items-center justify-center rounded-full bg-white text-gray-700 shadow-tinder-lg hover:text-primary-500 hover:shadow-tinder-xl transition-all duration-200;
   }
 
   .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500;
+    @apply w-full px-4 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent bg-white/70 backdrop-blur;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-white/80 backdrop-blur rounded-3xl shadow-tinder-lg border border-white/60 p-6 transition-transform duration-200;
   }
 
-  .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .pill {
+    @apply inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-white/80 text-primary-500 shadow-sm;
   }
 }
