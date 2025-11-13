@@ -280,6 +280,7 @@ def test_get_public_profile_active(db_session: Session):
         "avatar_url": "https://example.com/public.jpg",
         "bio": "Public bio",
         "hobbies": "public,hobbies",
+        "favorite_joke": "Why did the chicken cross the road?",
     }
     client.put(
         "/profile/me",
@@ -297,10 +298,10 @@ def test_get_public_profile_active(db_session: Session):
     assert data["avatar_url"] == "https://example.com/public.jpg"
     assert data["bio"] == "Public bio"
     assert data["hobbies"] == "public,hobbies"
+    assert data["favorite_joke"] == "Why did the chicken cross the road?"
     assert "created_at" in data
     # Sensitive fields should not be in public response
     assert "is_active" not in data
-    assert "favorite_joke" not in data
     assert "updated_at" not in data
 
 
@@ -345,11 +346,12 @@ def test_get_public_profile_limited_fields(db_session: Session):
     assert "avatar_url" in data
     assert "bio" in data
     assert "hobbies" in data
+    assert "favorite_joke" in data
+    assert data["favorite_joke"] == "Secret joke"
     assert "created_at" in data
     
     # Check sensitive fields are NOT present
     assert "is_active" not in data
-    assert "favorite_joke" not in data
     assert "updated_at" not in data
 
 
